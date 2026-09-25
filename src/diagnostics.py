@@ -22,3 +22,6 @@ def identify_build(file_hash):
         return "current"
     else:
         return "unknown"
+
+def find_rct3():
+    
