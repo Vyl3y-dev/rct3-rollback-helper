@@ -24,4 +24,9 @@ def identify_build(file_hash):
         return "unknown"
 
 def find_rct3():
-    
+    rct3_path = r"C:\Program Files (x86)\Steam\steamapps\common\RollerCoaster Tycoon 3 Complete Edition\RCT3.exe"
+
+    if not os.path.exists(rct3_path):
+        return None
+    else:
+        return rct3_path
