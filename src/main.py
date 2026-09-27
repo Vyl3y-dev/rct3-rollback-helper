@@ -1,5 +1,7 @@
+import os
 from src.diagnostics import hash_file, identify_build, find_rct3, find_steam, find_steam_libraries
-
+from src.recovery import get_legacy_download_command, get_legacy_depot_path, find_legacy_executable, verify_legacy_executable, get_backup_path, create_backup_path, backup_current_executable, verify_backup_executable, install_legacy_executable
+print(hash_file(r"C:\Users\vcmun\Desktop\RCT3-Test\RCT3.exe"))
 print("RCT3 Community Fix")
 print("-------------------")
 print()
@@ -40,6 +42,40 @@ if steam_path is not None:
 
         elif game_build == "current":
             print("Known affected post-March 2026 executable detected.")
+            print("Recover build available.")
+            print("Steam depot command: ")
+            print(get_legacy_download_command())
+            legacy_depot_path = get_legacy_depot_path(steam_path)
+            print(legacy_depot_path)
+            legacy_exe_path = find_legacy_executable(legacy_depot_path)
+
+            if legacy_exe_path is not None:
+                legacy_verified = verify_legacy_executable(legacy_exe_path)
+
+                if legacy_verified:
+                    print("Legacy executable verified.")
+
+                    backup_path = get_backup_path(rct3_path)
+
+                    create_backup_path(backup_path)
+
+                    backup_file_path = backup_current_executable(
+                        rct3_path,
+                        backup_path
+                    )
+
+                    verify_backup_executable(
+                        rct3_path,
+                        backup_file_path
+                    )
+
+                    install_legacy_executable(legacy_exe_path, rct3_path)
+
+                else:
+                    print("Legacy executable verification failed. Recovery stopped.")
+
+            else:
+                print("Legacy executable not found.")
 
         else:
             print("Unknown RCT3 executable detected. No changes will be made.")

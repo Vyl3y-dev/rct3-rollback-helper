@@ -10,7 +10,9 @@ Right now through my research of the current patch (2026) and the initial Comple
 Last time played: Some time well before the Mar 2026 update --> game works as intended completely. Had a nice big park and everything. 
 Recent attempt to play (before discovering there was an update 9/23/26-ish): game loads and plays but making peeps crashes the game entirely.
 Reading/Following crashdumps, grafixlogs, and online advice here and there nothing would keep it from crashing on the peep designer. Game was still playable. 
-All else failed --> "have you tried turning it off and back on again?" so uninstalled through steam and reinstalled + verified files (many times throughout this entire process) --> game no longer loads past opening credit screens/immediately crashes.
+Initial troubleshooting included uninstalling/reinstalling and repeatedly verifying the current Steam build. During later testing, a startup crash was observed in the official installation directory. This was ultimately traced to a same-named ZIP archive (`RollerCoaster Tycoon 3 Complete Edition.zip`) that had been manually created beside the installation while preparing files for external testing. RCT3 attempted to read this archive during startup. Renaming/removing the archive eliminated the startup crash.
+
+This startup failure is therefore considered a testing artifact and is not currently considered part of the March 2026 regression.
 
 ## Crash Signature
 Observed after reinstall on the current build:
@@ -22,17 +24,33 @@ Observed after reinstall on the current build:
 
 ## Current Findings
 * Ruled out Steam hanging on to persistent data which might be causing issues.
-* A general system incompatibility became unlikely after the legacy build ran successfully on the same PC/OS/hardware configuration. 
-* Crashdump mentions access violations which adds up with error reported in eventvwr but no obvious solutions actually worked.
-* Found previous build through steamdb.info/depot and downloaded it via Steam console. It runs the game fine and saved peeps (as expected). 
-* Compared hashes --> found difference in build despite being listed as the same version.
-* Measured file count of both legacy and current builds --> current build had 8 more files (not including crashdump which gets created after runs) and all were language related which was expected/matches vague patch notes of the last update (i.e. current build).
-* Files changed, however, was an extensive list of more than just language additions. Most are expected GUI changes due to language addition. Some are less expected edits to other language files but not super suspicious enough to be the culprit for the crashes. 
-    * Created a copy of the legacy build for testing: legacy-prime.
-        * replaced .exe file in legacy-prime with .exe from current build to test if files were causing the crashes in the game overall and/or peep designer. It did load the game with a blank ingame popup, upon clicking the ok to close the popup, went to test peep designer and it crashed (not unexpected).
-        * replaced .exe file in legacy-prime (which was current build) with the legacy build .exe and the game ran fine, peeps worked as intended. 
+## Current Findings
 
-Current testing strongly implicates changes to RCT3.exe in the reproduced Peep Designer crash. Further testing is ongoing to determine the exact cause and whether additional files contribute to other reported crashes.
+* The legacy 2020 build runs successfully on the same PC/OS/hardware configuration and saves Peep Designer groups correctly.
+* The legacy and current executables both report version `3.2.5.13`, but their SHA-256 hashes differ, confirming that they are different binaries.
+* The current build contains eight additional Simplified Chinese GUI resource files, consistent with the March 2026 language update.
+* Additional existing resource files were also modified between the builds.
+* Current resource groups were tested with the legacy executable individually and cumulatively. The game launched and Peep Designer saves succeeded.
+* With the current 2026 executable restored to the otherwise-working current installation, the game launches and functions normally until saving a Peep Designer group, which reproducibly crashes the game.
+* Replacing only the current executable with the verified legacy executable allows the same installation to launch and save Peep Designer groups successfully.
+
+Current testing therefore strongly implicates a change in the post-March 2026 `RCT3.exe` in the reproducible Peep Designer save crash. The exact failing operation is still under investigation.
+
+A byte-for-byte comparison was performed between a working reconstructed installation and the crashing Steam installation. Excluding generated/debugging files (`CrashDump.txt` and `RCT3CommunityFix_Backup\RCT3.exe`), the installations contained no differing, missing, or additional game files.
+
+Further path testing produced a reproducible startup-crash condition tied to the exact official Steam installation path:
+
+`C:\Program Files (x86)\Steam\steamapps\common\RollerCoaster Tycoon 3 Complete Edition`
+
+A byte-identical copy located at:
+
+`C:\Program Files (x86)\Steam\steamapps\common\RollerCoaster Tycoon 3 Complete Edition TEST`
+
+launched successfully and allowed Peep groups to be saved.
+
+The two directories were then renamed as a cross-test. The previously crashing installation was renamed to `RollerCoaster Tycoon 3 Complete Edition BROKEN` and immediately launched and saved Peeps successfully. The previously working installation was renamed to the exact official directory name, `RollerCoaster Tycoon 3 Complete Edition`, and immediately reproduced the startup crash.
+
+This demonstrates that, in the current test environment, the startup crash follows the exact official installation pathname rather than the physical copy of the game or the contents of its game files. The mechanism responsible for this path-specific behavior has not yet been identified.
 
 ## Hash Comparisons
 Current/2026 RCT3.exe SHA-256:
