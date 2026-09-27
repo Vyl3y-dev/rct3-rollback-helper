@@ -1,6 +1,6 @@
 import os
 import shutil
-from src.diagnostics import hash_file, LEGACY_HASH
+from src.diagnostics import hash_file, LEGACY_HASH, CURRENT_HASH
 
 RCT3_APP_ID = "1368820"
 RCT3_DEPOT_ID = "1368821"
@@ -56,9 +56,9 @@ def verify_backup_executable(rct3_path, backup_file_path):
     backup_hash = hash_file(backup_file_path)
 
     if original_hash == backup_hash:
-        print("Backup Verified")
+        return True
     else:
-        print("Backup Verification Failed")
+        return False
 
 def install_legacy_executable(legacy_exe_path, rct3_path):
     print(f"Source: {legacy_exe_path}")
@@ -75,6 +75,29 @@ def install_legacy_executable(legacy_exe_path, rct3_path):
     print(f"Expected legacy hash: {LEGACY_HASH}")
 
     if installed_hash == LEGACY_HASH:
-        print("Installation successful")
+        return True
     else:
-        print("Installation failed")
+        return False
+
+def restore_current_executable(backup_file_path, rct3_path):
+
+    shutil.copy2(backup_file_path, rct3_path)
+    restored_hash = hash_file(rct3_path)
+
+    if restored_hash == CURRENT_HASH:
+        return True
+    else:
+        return False
+
+def verify_restore_executable(backup_directory):
+    backup_file_path = os.path.join(backup_directory, "RCT3.exe")
+
+    if not os.path.exists(backup_file_path):
+        return False
+
+    backup_hash = hash_file(backup_file_path)
+
+    if backup_hash == CURRENT_HASH:
+        return True
+    else:
+        return False
