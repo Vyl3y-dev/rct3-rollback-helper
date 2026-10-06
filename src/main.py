@@ -1,5 +1,5 @@
 import os
-
+from src.dependencies import get_app_data_directory, get_depot_downloader
 from src.diagnostics import hash_file, identify_build, find_rct3, find_steam, find_steam_libraries
 from src.recovery import (
     get_backup_path,
@@ -17,7 +17,7 @@ from src.steam_depot import (
 )
 
 
-def recover_rct3(depot_downloader_exe_path, username, download_directory=None):
+def recover_rct3(download_directory=None):
     """Temporary controller until the GUI becomes the application controller."""
 
     steam_path = find_steam()
@@ -37,13 +37,21 @@ def recover_rct3(depot_downloader_exe_path, username, download_directory=None):
     if game_build != "current":
         return False, "Unknown RCT3 executable detected. No changes were made."
 
+    depot_downloader_exe_path = get_depot_downloader()
+
+    if depot_downloader_exe_path is None:
+        return False, "DepotDownloader could not be installed. Recovery stopped."
+    
     if download_directory is None:
-        download_directory = os.path.join(os.getcwd(), "downloads", "legacy")
+        download_directory = os.path.join(
+            get_app_data_directory(),
+            "downloads",
+            "legacy",
+        )
 
     if not download_legacy_executable(
         depot_downloader_exe_path,
         download_directory,
-        username,
     ):
         return False, "Legacy executable download failed. Recovery stopped."
 
@@ -108,15 +116,8 @@ def restore_rct3():
 # Temporary development entry point.
 # The GUI will replace this once it becomes the application's controller.
 if __name__ == "__main__":
-    depot_downloader_exe_path = input(
-        "Path to DepotDownloader.exe: "
-    ).strip().strip('"')
+    print("Yoan I love you 💖")
 
-    username = input("Steam username: ").strip()
-
-    success, message = recover_rct3(
-        depot_downloader_exe_path,
-        username,
-    )
+    success, message = recover_rct3()
 
     print(message)

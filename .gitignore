@@ -4,3 +4,10 @@ __pycache__/
 
 # Runtime downloads
 downloads/
+dependencies/
+
+build/
+dist/
+__pycache__/
+*.pyc
+.venv/

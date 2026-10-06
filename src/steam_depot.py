@@ -15,8 +15,7 @@ def get_downloaded_legacy_exe_path(download_directory):
 
 def download_legacy_executable(
         depot_downloader_exe_path,
-        download_directory,
-        username
+        download_directory
 ):
     os.makedirs(download_directory, exist_ok=True)
 
@@ -33,12 +32,20 @@ def download_legacy_executable(
         "-app", RCT3_APP_ID,
         "-depot", RCT3_DEPOT_ID,
         "-manifest", LEGACY_MANIFEST_ID,
-        "-username", username,
+        "-qr",
         "-dir", download_directory,
         "-filelist", filelist_path,
     ]
 
-    result = subprocess.run(command)
+    creation_flags = 0
+
+    if os.name == "nt":
+        creation_flags = subprocess.CREATE_NEW_CONSOLE
+
+    result = subprocess.run(
+        command,
+        creationflags=creation_flags,
+    )
 
     return result.returncode == 0
 
