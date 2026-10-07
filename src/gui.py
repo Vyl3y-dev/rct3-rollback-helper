@@ -1,4 +1,8 @@
+import ctypes
+import os
+import sys
 import customtkinter as ctk
+import tkinter as tk
 import threading
 from src.main import recover_rct3, restore_rct3
 from src.diagnostics import (
@@ -9,6 +13,20 @@ from src.diagnostics import (
     identify_build,
 )
 
+if sys.platform == "win32":
+    app_id = "Vyley.RCT3CompatibilityHelper"
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+
+
+def resource_path(relative_path):
+    if getattr(sys, "frozen", False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..")
+        )
+
+    return os.path.join(base_path, relative_path)
 
 ctk.set_appearance_mode("dark")
 
@@ -21,6 +39,14 @@ class RCT3CompatibilityHelper(ctk.CTk):
         self.title("RCT3 Compatibility Helper")
         self.geometry("600x450")
         self.resizable(False, False)
+
+        self._icon = tk.PhotoImage(
+            file=resource_path("assets/RCT3HelperIcon.png")
+        )
+
+        # Prevent CustomTkinter from replacing our icon with its default.
+        self.iconbitmap()
+        self.iconphoto(True, self._icon)
 
         self.create_widgets()
         self.detect_game()

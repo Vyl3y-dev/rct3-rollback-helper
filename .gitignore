@@ -11,3 +11,5 @@ dist/
 __pycache__/
 *.pyc
 .venv/
+*.spec
+!RCT3 Compatibility Helper.spec
